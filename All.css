@@ -1,0 +1,24 @@
+
+body{
+		color: #fff;
+		background: #07D;
+		text-align: ;
+		font-size: 20px;
+	}
+	button{
+		padding: 5px;
+		border: 2px solid #000000;
+		border-radius: 5px;
+		background: #0089ff;
+		color: #fff;
+		font-size: 18px;
+	}
+	textarea{
+		font-family: Microsoft Yahei;
+		height: 35px;
+		width: 80%;
+		font-size: 20px;
+	}
+  a{
+    outline:none;
+  }

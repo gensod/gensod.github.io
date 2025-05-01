@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<head>  
+  <title>GenSod</title>
+  <link rel="icon" href="title.png" type="image/x-icon">
+  <link rel="stylesheet" type="text/css" href="All.css">
+  <style type="text/css">
+    .bsod_bg {
+      cursor: none;
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      font-family: Segoe UI;
+      background: #0086ac;
+      color: #ffffff;
+    }
+    .rainbow-btn {
+      background: linear-gradient(to right, 
+        red, 
+        orange, 
+        yellow, 
+        green, 
+        blue, 
+        indigo, 
+        violet);
+      color: white;
+      font-size: 15px;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+    }
+    #unsafeCommandContainer {
+      display: none;
+      margin-top: 10px;
+    }
+    #fileInput {
+      display: none;
+    }
+    .file-input-label {
+      display: inline-block;
+      padding: 6px 12px;
+      cursor: pointer;
+      background-color: #0089ff;
+      border: 2px solid #000000;
+      border-radius: 4px;
+      margin-left: 10px;
+    }
+    .file-input-label:hover {
+      background-color: #07D;
+    }
+  </style>
+</head>
+
+<body>
+<center>
+  <h2>GenSod</h2>
+  <h3>SoD simulator</h3>
+
+  <div style="font-size: 20px;">
+    Background Color: <input type="color" id="bsodbg" style="height:35px;width:60px;" value="#006cd0">
+    Font Color: <input type="color" id="bsodfc" style="height:35px;width:60px;" value="#FFFFFF">
+    <br><br>
+    Preset Colors:
+    <button style="font-size: 15px; color: #fff; background: #006cd0;" onclick="bsodbg.value='#006cd0'">Blue 1</button>
+    <button style="font-size: 15px; color: #fff; background: #0086ac;" onclick="bsodbg.value='#0086ac'">Blue 2</button>
+    <button style="font-size: 15px; color: #fff; background: #000000;" onclick="bsodbg.value='#000000'">Black</button>
+    <button style="font-size: 15px; color: #fff; background: #246f24;" onclick="bsodbg.value='#246f24'">Green</button>
+    <button class="rainbow-btn" onclick="setRainbowGradient()">Rainbow</button>
+    <br><br>
+  </div>
+
+  Emoticon : &nbsp;<textarea id="bssad">:(</textarea>
+  <br>
+  First Line : <textarea id="bsli1">Your device ran into a problem and needs to restart. We're</textarea>
+  <br>
+  Second Line : <textarea id="bsli2">just collecting some info, and then we'll restart for you.</textarea>
+  <br>
+  Third Line : <textarea id="bsli3">complete</textarea>
+  <br>
+  Fourth Line : <textarea id="bsli4">For more information about this issue and possible fixes, visit</textarea>
+  <br>
+  Fifth Line : <textarea id="bsli5">https://www.windows.com/stopcode</textarea>
+  <br>
+  Sixth Line : <textarea id="bsli6">If you call a support person, give them this info:</textarea>
+  <br>
+  Seventh Line : <textarea id="bsli7">Error Code: CRITICAL_PROCESS_DIED</textarea>
+  <div id="unsafeCommandContainer">
+    Unsafe Mode Command : <textarea id="unsafeCommand"></textarea>
+    <br>
+    <label for="fileInput" class="file-input-label">Or load JS file</label>
+    <input type="file" id="fileInput" accept=".js">
+    <span id="fileName"></span>
+    <br><br>
+  </div>
+  <br><br>
+  <input type="checkbox" id="qrm" checked> Display QR code
+  <br><br>
+  
+  <button style="padding: 10px;" onclick="show()">Start</button>
+</center>
+
+<!-- Blue Screen Div -->
+<div class="bsod_bg" id="bsod">
+  <div style="position: absolute; top: 5%; left: 18%;">
+    <span id="bsodsad" style="font-size: 120pt; margin: 0; margin-bottom: 10pt">:(</span>
+    <br><br>
+    <p style="font-size: 25pt; margin: 0; padding: 0;">
+      <span id="bsline1"></span><br>
+      <span id="bsline2"></span><br><br>
+      <span id="bsline3n">0% complete</span> <span id="bsline3"></span>
+    </p>
+    <br><br>
+    <img id="qr" style="float:left; margin-right:30px;" src="qr.png">
+    <div style="float:left;">
+      <p style="font-size: 14pt; margin-top: 0px; padding: 0; line-height: 32px;">
+        <span id="bsline4"></span><br>
+        <span id="bsline5"></span><br><br>
+        <span id="bsline6"></span><br>
+        <span id="bsline7"></span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript"> 
+var progress = 0;
+var loadedScript = null;
+
+function bsodset() {
+  // Check if we're using the rainbow gradient
+  if (!bsod.style.background.includes('gradient')) {
+    bsod.style.background = bsodbg.value;
+  }
+  bsod.style.color = bsodfc.value;
+  bsodsad.innerHTML = bssad.value;
+  bsline1.innerHTML = bsli1.value;
+  bsline2.innerHTML = bsli2.value;
+  bsline4.innerHTML = bsli4.value;
+  bsline5.innerHTML = bsli5.value;
+  bsline6.innerHTML = bsli6.value;
+  bsline7.innerHTML = bsli7.value;
+  if (qrm.checked) {
+    qr.style.display = "block";
+  } else {
+    qr.style.display = "none";
+  }
+}
+
+function setRainbowGradient() {
+  bsod.style.background = 'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)';
+  // Update the color picker to the first color (red) for consistency
+  bsodbg.value = '#ff0000';
+}
+
+function loadScriptFromFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const scriptContent = event.target.result;
+        resolve(scriptContent);
+      } catch (e) {
+        reject(e);
+      }
+    };
+    reader.onerror = () => {
+      reject(new Error("Failed to read file"));
+    };
+    reader.readAsText(file);
+  });
+}
+
+// No crazy 1ms interval! Only update when showing!
+function update_progress() {
+  if (progress < 100) {
+    progress += Math.floor(Math.random() * 5) + 1; // Random increase 1–5
+    if (progress > 100) progress = 100;
+    document.getElementById('bsline3n').innerHTML = progress + "% complete";
+    setTimeout(update_progress, 2000);
+  } else {
+    document.getElementById('bsline3').innerHTML = "";
+    // Execute unsafe command if it exists and we're in unsafe mode
+    if (window.unsafeModeActive) {
+      try {
+        if (loadedScript) {
+          eval(loadedScript);
+        } else if (document.getElementById('unsafeCommand').value) {
+          eval(document.getElementById('unsafeCommand').value);
+        }
+      } catch (e) {
+        console.error("Error executing unsafe command:", e);
+      }
+    }
+  }
+}
+
+function show() {
+  bsodset(); // Update texts once
+  document.getElementById('bsod').style.display = 'block';
+  progress = 0; // Reset progress counter
+  document.getElementById('bsline3n').innerHTML = "0% complete"; // Reset text
+  document.getElementById('bsline3').innerHTML = "";
+  update_progress();
+  
+  const docElm = document.documentElement;
+  if (docElm.requestFullscreen) {
+    docElm.requestFullscreen();
+  } else if (docElm.mozRequestFullScreen) { 
+    docElm.mozRequestFullScreen();
+  } else if (docElm.webkitRequestFullscreen) { 
+    docElm.webkitRequestFullscreen();
+  } else if (docElm.msRequestFullscreen) { 
+    docElm.msRequestFullscreen();
+  }
+}
+
+function stop() {
+  return false;
+}
+
+function hotkey() {
+  var a = window.event.keyCode;
+  if (a == 27) {
+    bsod.style.display = "none";
+    document.exitFullscreen();
+  }
+}
+
+function unsafemode() {
+  window.unsafeModeActive = true;
+  document.getElementById('unsafeCommandContainer').style.display = 'block';
+  console.log("Unsafe mode activated. You can now:");
+  console.log("- Enter commands directly in the textbox");
+  console.log("- Or load a .js file that will execute after BSOD");
+}
+
+window.onload = function() {
+  document.onkeydown = hotkey;
+  // Expose unsafemode function to global scope
+  window.unsafemode = unsafemode;
+  
+  // Handle file selection
+  document.getElementById('fileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      document.getElementById('fileName').textContent = file.name;
+      loadScriptFromFile(file)
+        .then(script => {
+          loadedScript = script;
+          document.getElementById('unsafeCommand').value = ''; // Clear direct command
+          console.log("Script loaded successfully. It will execute after BSOD completes.");
+        })
+        .catch(error => {
+          console.error("Error loading script:", error);
+          document.getElementById('fileName').textContent = "Error loading file";
+        });
+    }
+  });
+};
+</script>
