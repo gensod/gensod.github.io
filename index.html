@@ -259,4 +259,9 @@ window.onload = function() {
     }
   });
 };
+
+// Disable right-click on the BSOD screen only
+document.getElementById("bsod").addEventListener("contextmenu", function (e) {
+  e.preventDefault();
+});
 </script>
